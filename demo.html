@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neuro-Symbolic Diagnostic Copilot — R&D Hardware & Firmware</title>
+<style>
+:root {
+  --bg-dark: #080c14;
+  --bg-card: #0f172a;
+  --bg-card-sub: #1e293b;
+  --bg-card-hover: #1e2942;
+  --border-color: #334155;
+  --border-glow: #38bdf8;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  
+  --cyan: #06b6d4;
+  --cyan-glow: rgba(6, 182, 212, 0.3);
+  --blue: #3b82f6;
+  --blue-glow: rgba(59, 130, 246, 0.3);
+  --emerald: #10b981;
+  --emerald-glow: rgba(16, 185, 129, 0.3);
+  --amber: #f59e0b;
+  --amber-glow: rgba(245, 158, 11, 0.3);
+  --red: #ef4444;
+  --red-glow: rgba(239, 68, 68, 0.3);
+  --purple: #a855f7;
+  --purple-glow: rgba(168, 85, 247, 0.3);
+  
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  line-height: 1.5;
+  overflow-x: hidden;
+  padding-bottom: 60px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-dark); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
+
+/* Header & Nav */
+header {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(8, 12, 20, 0.95) 100%);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(16px);
+  padding: 12px 24px;
+}
+.header-wrap {
+  max-width: 1480px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.brand-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.brand-logo {
+  background: linear-gradient(135deg, var(--cyan), var(--blue));
+  color: #fff;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  letter-spacing: 1px;
+  box-shadow: 0 0 20px var(--cyan-glow);
+}
+.brand-title {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.brand-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.nav-tabs {
+  display: flex;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 5px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  gap: 6px;
+}
+.tab-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tab-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+.tab-btn.active {
+  background: var(--blue);
+  color: #fff;
+  box-shadow: 0 0 16px var(--blue-glow);
+}
+
+/* Layout */
+.container {
+  max-width: 1480px;
+  margin: 24px auto;
+  padding: 0 20px;
+}
+.tab-pane {
+  display: none;
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.tab-pane.active { display: block; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Typography & General Components */
+h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.lead-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+  max-width: 1100px;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.badge-cyan { background: rgba(6, 182, 212, 0.15); color: var(--cyan); border: 1px solid rgba(6, 182, 212, 0.35); }
+.badge-blue { background: rgba(59, 130, 246, 0.15); color: var(--blue); border: 1px solid rgba(59, 130, 246, 0.35); }
+.badge-emerald { background: rgba(16, 185, 129, 0.15); color: var(--emerald); border: 1px solid rgba(16, 185, 129, 0.35); }
+.badge-amber { background: rgba(245, 158, 11, 0.15); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.35); }
+.badge-red { background: rgba(239, 68, 68, 0.15); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.35); }
+.badge-purple { background: rgba(168, 85, 247, 0.15); color: var(--purple); border: 1px solid rgba(168, 85, 247, 0.35); }
+
+/* Card */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 20px;
+  position: relative;
+}
+
+/* =========================================================
+   TAB 1: ARCHITECTURE & DATA FLOW
+   ========================================================= */
+.arch-pipeline-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 30px;
+}
+.layer-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.25s ease;
+}
+.layer-card:hover {
+  border-color: var(--cyan);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+}
+.layer-card.highlight {
+  border-color: var(--cyan);
+  box-shadow: 0 0 20px var(--cyan-glow);
+}
+.layer-head {
+  padding: 14px 20px;
+  background: var(--bg-card-sub);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.layer-id-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.layer-idx {
+  background: var(--bg-dark);
+  color: var(--cyan);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 13px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+.layer-name-str {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+.layer-grid {
+  padding: 18px 20px;
+  display: grid;
+  grid-template-columns: 2fr 1.3fr 1.3fr 0.8fr;
+  gap: 16px;
+  align-items: center;
+}
+@media(max-width: 1080px) {
+  .layer-grid { grid-template-columns: 1fr; }
+}
+.col-header {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.tech-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tech-tag {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--cyan);
+}
+.io-block {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px dashed var(--border-color);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.io-block strong {
+  color: var(--text-main);
+  display: block;
+  margin-bottom: 2px;
+}
+.btn-view-schema {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 7px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-view-schema:hover {
+  background: var(--cyan);
+  color: #000;
+  font-weight: 700;
+  border-color: var(--cyan);
+}
+
+/* Comparison Table */
+.comparison-card {
+  margin-top: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 24px;
+}
+.comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 14px;
+}
+.comp-table th, .comp-table td {
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  text-align: left;
+}
+.comp-table th {
+  background: var(--bg-card-sub);
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 12px;
+}
+.comp-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* =========================================================
+   TAB 2: INTERACTIVE LIVE PROTOTYPE
+   ========================================================= */
+.proto-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 20px;
+}
+@media(max-width: 1140px) {
+  .proto-layout { grid-template-columns: 1fr; }
+}
+
+/* Left Column: Telemetry & Ingestion Controls */
+.telemetry-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.auto-demo-bar {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
+  border: 1px solid var(--cyan);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.btn-auto-walkthrough {
+  background: linear-gradient(135deg, var(--cyan), var(--blue));
+  color: #fff;
+  border: none;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 0 12px var(--cyan-glow);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-auto-walkthrough:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 18px var(--blue-glow);
+}
+
+.preset-card-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.preset-item-btn {
+  background: var(--bg-card-sub);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+}
+.preset-item-btn:hover {
+  border-color: var(--blue);
+  background: var(--bg-card-hover);
+}
+.preset-item-btn.active {
+  border-color: var(--cyan);
+  background: rgba(6, 182, 212, 0.12);
+  box-shadow: 0 0 12px var(--cyan-glow);
+}
+.preset-title { font-weight: 700; font-size: 13px; color: #fff; display: flex; justify-content: space-between; }
+.preset-detail { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* Dropzone & Live Register Scan */
+.dropzone-box {
+  background: rgba(0, 0, 0, 0.35);
+  border: 2px dashed var(--border-color);
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.dropzone-box:hover, .dropzone-box.scanning {
+  border-color: var(--cyan);
+  background: rgba(6, 182, 212, 0.06);
+}
+.scan-progress-bar {
+  height: 3px;
+  background: var(--border-color);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 8px;
+  display: none;
+}
+.scan-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--cyan);
+  transition: width 0.3s;
+}
+
+.registers-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+.reg-chip {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+.reg-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; }
+.reg-val { font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--cyan); margin-top: 1px; }
+
+.symptom-text-area {
+  width: 100%;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  resize: vertical;
+  min-height: 85px;
+}
+.symptom-text-area:focus {
+  outline: none;
+  border-color: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan-glow);
+}
+
+.btn-trigger-ai {
+  background: linear-gradient(135deg, var(--cyan), var(--blue));
+  color: #fff;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 15px var(--cyan-glow);
+  transition: all 0.2s;
+}
+.btn-trigger-ai:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px var(--blue-glow);
+}
+
+/* Right Column: Visualization & Action Center */
+.proto-workspace {
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  gap: 20px;
+}
+@media(max-width: 950px) {
+  .proto-workspace { grid-template-columns: 1fr; }
+}
+
+/* Dynamic Live Tree Card */
+.live-tree-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+}
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+.card-header-row h3 { font-size: 15px; font-weight: 700; color: #fff; }
+.entropy-meter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.entropy-bar-bg {
+  width: 70px;
+  height: 6px;
+  background: var(--bg-card-sub);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.entropy-bar-fill {
+  height: 100%;
+  width: 78%;
+  background: var(--amber);
+  transition: all 0.4s;
+}
+
+.svg-canvas-box {
+  width: 100%;
+  background: #060a12;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 12px 6px;
+  overflow-x: auto;
+}
+
+/* Explainable Signals Box */
+.signals-container {
+  margin-top: 14px;
+  background: var(--bg-card-sub);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+}
+.sig-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  padding: 4px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
+}
+.sig-row:last-child { border-bottom: none; }
+
+/* Active Testing Center */
+.active-test-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+}
+.step-card {
+  background: var(--bg-card-sub);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  transition: all 0.25s ease;
+}
+.step-card.priority-1 {
+  border-color: var(--cyan);
+  box-shadow: 0 0 14px var(--cyan-glow);
+}
+.step-card.verified {
+  border-color: var(--emerald);
+  background: rgba(16, 185, 129, 0.05);
+}
+.step-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.step-title-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rank-circle {
+  background: var(--blue);
+  color: #fff;
+  font-weight: 800;
+  font-size: 11px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.step-name { font-weight: 700; font-size: 13px; color: #fff; }
+.cost-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+}
+.step-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+.schematic-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--amber);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.action-row {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.btn-choice {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-choice:hover { border-color: var(--cyan); color: #fff; }
+.btn-choice.active-norm {
+  background: var(--emerald);
+  color: #000;
+  border-color: var(--emerald);
+}
+.btn-choice.active-abnorm {
+  background: var(--red);
+  color: #fff;
+  border-color: var(--red);
+}
+
+/* Continuous Learning Banner */
+.learning-commit-box {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 182, 212, 0.12) 100%);
+  border: 1px dashed var(--emerald);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+.learning-commit-box.show { display: flex; }
+.btn-commit-laplace {
+  background: var(--emerald);
+  color: #000;
+  font-weight: 800;
+  border: none;
+  padding: 9px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: 0 0 12px var(--emerald-glow);
+  transition: all 0.2s;
+}
+.btn-commit-laplace:hover {
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   TAB 3: MATH & RIGOR
+   ========================================================= */
+.math-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media(max-width: 980px) {
+  .math-container { grid-template-columns: 1fr; }
+}
+.formula-display {
+  background: #050810;
+  border: 1px solid var(--border-color);
+  padding: 14px;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: #38bdf8;
+  margin: 12px 0;
+  text-align: center;
+}
+.interactive-slider-box {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 14px;
+  margin-top: 14px;
+}
+
+/* Modal Schema View */
+.modal-layer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-layer.active { display: flex; }
+.modal-inner {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  max-width: 780px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 24px;
+  position: relative;
+}
+.modal-close-x {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 20px;
+  cursor: pointer;
+}
+.modal-close-x:hover { color: #fff; }
+pre.code-dump {
+  background: #050811;
+  border: 1px solid var(--border-color);
+  padding: 12px;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #7dd3fc;
+  overflow-x: auto;
+  margin: 10px 0;
+}
+</style>
+</head>
+<body>
+
+<!-- TOP HEADER -->
+<header>
+  <div class="header-wrap">
+    <div class="brand-group">
+      <div class="brand-logo">NS-DC</div>
+      <div>
+        <div class="brand-title">
+          Neuro-Symbolic Diagnostic Copilot
+          <span class="badge badge-cyan">v2.5 Enterprise</span>
+        </div>
+        <div class="brand-sub">Hệ sinh thái Hỗ trợ Chẩn đoán Phần cứng & Firmware dựa trên GraphRAG và Suy diễn Bayes</div>
+      </div>
+    </div>
+    
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="navigateTab('arch')">
+        <span>🏛</span> Kiến trúc & Luồng Dữ liệu
+      </button>
+      <button class="tab-btn" onclick="navigateTab('proto')">
+        <span>⚡</span> Live Prototype Simulator
+      </button>
+      <button class="tab-btn" onclick="navigateTab('math')">
+        <span>📐</span> Thuật toán & Data Schemas
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ========================================================
+       TAB 1: ARCHITECTURE & DATA FLOW
+       ======================================================== -->
+  <div id="tab-arch" class="tab-pane active">
+    <h2><span>🏛</span> Kiến trúc Hệ thống 4 Tầng & Luồng Dữ liệu (End-to-End Pipeline)</h2>
+    <p class="lead-desc">Hệ thống phân tách rạch ròi: LLM chỉ làm nhiệm vụ hiểu ngữ nghĩa đa ngôn ngữ và chuẩn hóa tài liệu (Neural), còn cấu trúc topo mạch điện và tính toán độ tin cậy được đảm nhiệm bởi Đồ thị tri thức (GraphRAG) và Mạng Bayes (Symbolic).</p>
+
+    <div class="arch-pipeline-wrap">
+
+      <!-- TẦNG 1 -->
+      <div class="layer-card" id="layer-card-1">
+        <div class="layer-head">
+          <div class="layer-id-title">
+            <div class="layer-idx">01</div>
+            <div>
+              <div class="layer-name-str">Tầng Trích xuất & Cấu trúc Tri thức (Ingestion & Tri-Store Layer)</div>
+              <div style="font-size:11px;color:var(--text-muted)">Chuyển đổi Datasheet IC, Sơ đồ mạch Schematic, Bảng FMEA và Lịch sử sửa chữa thành dữ liệu đồ thị</div>
+            </div>
+          </div>
+          <span class="badge badge-purple">Batch / Offline ETL</span>
+        </div>
+        <div class="layer-grid">
+          <div>
+            <div class="col-header">Công nghệ cốt lõi (Tech Stack)</div>
+            <div class="tech-pills">
+              <span class="tech-tag">Docling / LlamaParse</span>
+              <span class="tech-tag">Gemini 2.5 Pro Vision</span>
+              <span class="tech-tag">Neo4j (Knowledge Graph)</span>
+              <span class="tech-tag">Qdrant (Hybrid RAG)</span>
+              <span class="tech-tag">PostgreSQL (CPT Matrix)</span>
+            </div>
+          </div>
+          <div>
+            <div class="col-header">Input Dữ liệu</div>
+            <div class="io-block">
+              <strong>Tài liệu Kỹ thuật Thô</strong>
+              PDF Datasheet (TPS48111, A4919, STM32G4), Bảng lỗi Excel của kỹ sư, Sơ đồ Altium PDF, Log Chat đã verify
+            </div>
+          </div>
+          <div>
+            <div class="col-header">Output Chuẩn hóa</div>
+            <div class="io-block">
+              <strong>Tri-Store Entities</strong>
+              Graph Nodes (Component, Pin, Threshold, Subsystem) + Dense/Sparse Vectors + Bảng Prior Probabilities
+            </div>
+          </div>
+          <div style="text-align:right">
+            <button class="btn-view-schema" onclick="showModal('modal-l1')">🔍 Xem JSON Schema</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TẦNG 2 -->
+      <div class="layer-card" id="layer-card-2">
+        <div class="layer-head">
+          <div class="layer-id-title">
+            <div class="layer-idx">02</div>
+            <div>
+              <div class="layer-name-str">Tầng Tiếp nhận Tức thời & Phân tích Đa ngôn ngữ (Online Parser & Semantic Extractor)</div>
+              <div style="font-size:11px;color:var(--text-muted)">Bóc tách file Data Log nhị phân/CSV từ thiết bị và chuẩn hóa câu mô tả tiếng Việt/Anh tự nhiên của kỹ sư</div>
+            </div>
+          </div>
+          <span class="badge badge-blue">Online Session Init</span>
+        </div>
+        <div class="layer-grid">
+          <div>
+            <div class="col-header">Công nghệ cốt lõi (Tech Stack)</div>
+            <div class="tech-pills">
+              <span class="tech-tag">Rust-Python Telemetry Parser</span>
+              <span class="tech-tag">BGE-M3 Multilingual Embedding</span>
+              <span class="tech-tag">LangGraph State Machine</span>
+              <span class="tech-tag">Structured Output Pydantic</span>
+            </div>
+          </div>
+          <div>
+            <div class="col-header">Input Dữ liệu</div>
+            <div class="io-block">
+              <strong>Telemetry & Prompt</strong>
+              File Data Log máy (.bin / .csv) chứa thanh ghi đếm lỗi + Lời mô tả bằng tiếng Việt/Anh tự do của kỹ sư
+            </div>
+          </div>
+          <div>
+            <div class="col-header">Output Chuẩn hóa</div>
+            <div class="io-block">
+              <strong>Initial Evidence Vector ($E_0$)</strong>
+              Pre-filled Telemetry (Dòng 295A, Áp 18.2V, Temp 141°C) + Semantic Entities ánh xạ vào Graph Node
+            </div>
+          </div>
+          <div style="text-align:right">
+            <button class="btn-view-schema" onclick="showModal('modal-l2')">🔍 Xem Evidence Schema</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TẦNG 3 -->
+      <div class="layer-card" id="layer-card-3">
+        <div class="layer-head">
+          <div class="layer-id-title">
+            <div class="layer-idx">03</div>
+            <div>
+              <div class="layer-name-str">Tầng Suy diễn Xác suất & Gợi ý Đo Tối ưu (Bayesian & Active Diagnosis Engine)</div>
+              <div style="font-size:11px;color:var(--text-muted)">Trái tim toán học: Cập nhật Bayes Noisy-OR liên tục và thuật toán Next-Best-Test dựa trên Information Gain / Cost</div>
+            </div>
+          </div>
+          <span class="badge badge-emerald">Real-time Inference (sub-10ms)</span>
+        </div>
+        <div class="layer-grid">
+          <div>
+            <div class="col-header">Công nghệ cốt lõi (Tech Stack)</div>
+            <div class="tech-pills">
+              <span class="tech-tag">Python NumPy / SciPy</span>
+              <span class="tech-tag">pgmpy (Bayesian Networks)</span>
+              <span class="tech-tag">Continuous Sigmoid Likelihood</span>
+              <span class="tech-tag">Shannon Entropy Optimizer</span>
+            </div>
+          </div>
+          <div>
+            <div class="col-header">Input Dữ liệu</div>
+            <div class="io-block">
+              <strong>Graph Model + Live Inputs</strong>
+              Initial Evidence + Kết quả đo đạc thời gian thực từ kỹ thuật viên (VOM, kẹp dòng, mắt thường)
+            </div>
+          </div>
+          <div>
+            <div class="col-header">Output Chuẩn hóa</div>
+            <div class="io-block">
+              <strong>Posterior Probabilities & Ranked Tests</strong>
+              Phân phối xác suất các nhánh lỗi + Danh sách bước đo tiếp theo có tỷ lệ $IG/\text{Cost}^\alpha$ cao nhất
+            </div>
+          </div>
+          <div style="text-align:right">
+            <button class="btn-view-schema" onclick="showModal('modal-l3')">🔍 Xem Công thức Bayes</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TẦNG 4 -->
+      <div class="layer-card" id="layer-card-4">
+        <div class="layer-head">
+          <div class="layer-id-title">
+            <div class="layer-idx">04</div>
+            <div>
+              <div class="layer-name-str">Tầng Tương tác Trực quan & Học Tăng cường (Interactive UI & Continuous Learning)</div>
+              <div style="font-size:11px;color:var(--text-muted)">Cây lỗi động Live FTA, bảng giải thích tín hiệu minh bạch và vòng lặp học tự động từ ca sửa chữa thành công</div>
+            </div>
+          </div>
+          <span class="badge badge-cyan">Full-Stack Frontend & Feedback</span>
+        </div>
+        <div class="layer-grid">
+          <div>
+            <div class="col-header">Công nghệ cốt lõi (Tech Stack)</div>
+            <div class="tech-pills">
+              <span class="tech-tag">Next.js 15 (React 19)</span>
+              <span class="tech-tag">React Flow / D3.js</span>
+              <span class="tech-tag">TailwindCSS / Shadcn UI</span>
+              <span class="tech-tag">Laplace Conjugate Updater</span>
+            </div>
+          </div>
+          <div>
+            <div class="col-header">Input Dữ liệu</div>
+            <div class="io-block">
+              <strong>Thao tác Kỹ sư & Xác nhận</strong>
+              Tương tác điền giá trị đo, xác nhận nguyên nhân gốc (Root Cause Verified) và đánh giá độ hài lòng
+            </div>
+          </div>
+          <div>
+            <div class="col-header">Output Chuẩn hóa</div>
+            <div class="io-block">
+              <strong>Cây Lỗi Sống + Tri thức Mới</strong>
+              Live Dynamic Visual Tree + Tự động cập nhật trọng số xác suất lịch sử và tạo đề xuất nút lá mới
+            </div>
+          </div>
+          <div style="text-align:right">
+            <button class="btn-view-schema" onclick="showModal('modal-l4')">🔍 Xem Vòng lặp Học</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SO SÁNH GIẢI PHÁP -->
+    <div class="comparison-card">
+      <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:6px">So sánh Đối đầu: Phương pháp Truyền thống vs. Neuro-Symbolic Copilot</h3>
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th>Tiêu chí Đánh giá</th>
+            <th>Cách làm Hiện tại / Naive RAG</th>
+            <th>Hệ thống Neuro-Symbolic GraphRAG + Bayes Đề xuất</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Độ chính xác về Số học & Ngưỡng</strong></td>
+            <td>Dễ hallucinate; không hiểu ranh giới sát ngưỡng (295A vs 320A)</td>
+            <td>Chính xác tuyệt đối nhờ Hàm Sigmoid liên tục dựa trên ngưỡng vật lý trong Graph</td>
+          </tr>
+          <tr>
+            <td><strong>Hiểu biết về Mạch điện tử</strong></td>
+            <td>Cắt nhỏ tài liệu làm đứt gãy mối quan hệ IC $\rightarrow$ Chân $\rightarrow$ Điểm đo</td>
+            <td>Đồ thị Neo4j bảo toàn nguyên vẹn topo schematic và đường dẫn tín hiệu</td>
+          </tr>
+          <tr>
+            <td><strong>Tính toán Xác suất Chẩn đoán</strong></td>
+            <td>Cộng trừ điểm cứng giả lập, mục cao nhất luôn bị ép lên 100%</td>
+            <td>Suy diễn mạng Bayes Noisy-OR chuẩn toán học; bảo toàn xác suất thực tế</td>
+          </tr>
+          <tr>
+            <td><strong>Thứ tự Gợi ý Bước đo</strong></td>
+            <td>Cố định theo quy trình tĩnh; bắt tháo máy cắm máy đo tốn thời gian</td>
+            <td>Tối ưu hóa Information Gain / Chi phí (Next-Best-Test): Ưu tiên bước nhanh trước</td>
+          </tr>
+          <tr>
+            <td><strong>Khả năng Tự hoàn thiện</strong></td>
+            <td>Tài liệu FMEA đóng băng; kinh nghiệm kỹ sư nằm rải rác</td>
+            <td>Tự động cập nhật Prior Bayes qua phân phối Laplace mỗi khi có ca sửa thành công</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ========================================================
+       TAB 2: INTERACTIVE LIVE PROTOTYPE
+       ======================================================== -->
+  <div id="tab-proto" class="tab-pane">
+    <h2><span>⚡</span> Interactive Live Prototype Simulator</h2>
+    <p class="lead-desc">Mô phỏng trải nghiệm thực tế của kỹ sư R&D/FA: Nạp dữ liệu Data Log, đọc mô tả tự nhiên tiếng Việt, chứng kiến mạng Bayes cập nhật cây lỗi FTA và tương tác đo kiểm từng bước.</p>
+
+    <div class="proto-layout">
+      
+      <!-- CỘT TRÁI: ĐIỀU KHIỂN & TELEMETRY -->
+      <div class="telemetry-panel card">
+        
+        <!-- AUTO WALKTHROUGH BANNER CHO SẾP -->
+        <div class="auto-demo-bar">
+          <div>
+            <div style="font-size:12px;font-weight:800;color:var(--cyan)">CHẾ ĐỘ DEMO CHO SẾP</div>
+            <div style="font-size:10px;color:var(--text-muted)">Tự động diễn giải ca A937 theo kịch bản 4 bước</div>
+          </div>
+          <button class="btn-auto-walkthrough" id="btn-run-auto" onclick="startAutoWalkthrough()">
+            ▶ Chạy Demo Tự Động
+          </button>
+        </div>
+
+        <!-- PRESET CHỌN MẪU -->
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;display:block;margin-bottom:6px">Chọn Kịch bản Thiết bị Kiểm thử:</label>
+          <div class="preset-card-group">
+            <div class="preset-item-btn active" id="btn-pre-a937" onclick="applyPreset('a937')">
+              <div class="preset-title"><span>Máy cắt A937: Tắt khi cắt bê tông</span> <span class="badge badge-red">295A</span></div>
+              <div class="preset-detail">Data log báo lỗi quá nhiệt thứ cấp; dòng đạt 92% ngưỡng HWOC.</div>
+            </div>
+            <div class="preset-item-btn" id="btn-pre-a912" onclick="applyPreset('a912')">
+              <div class="preset-title"><span>Máy siết bu-lông A912: Giật khựng Stator</span> <span class="badge badge-amber">HALL</span></div>
+              <div class="preset-detail">Xung Hall kẹt 000; động cơ rung lắc không tăng tốc được.</div>
+            </div>
+            <div class="preset-item-btn" id="btn-pre-a552" onclick="applyPreset('a552')">
+              <div class="preset-title"><span>Máy khoan A552: Reset ngẫu nhiên</span> <span class="badge badge-purple">MCU WDT</span></div>
+              <div class="preset-detail">Watchdog timeout; sụt áp tức thời trên đường 3.3V_MCU.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TELEMETRY DROPZONE & REGISTERS -->
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase">Data Log Telemetry tự động trích xuất:</span>
+            <span style="font-size:10px;color:var(--emerald);cursor:pointer" onclick="simulateDropLog()">[Re-scan .BIN]</span>
+          </div>
+
+          <div class="dropzone-box" id="dropzone-area" onclick="simulateDropLog()">
+            <div style="font-size:22px;color:var(--cyan);margin-bottom:2px">📄</div>
+            <div style="font-size:12px;font-weight:800;color:#fff" id="log-name-tag">A937_SNAPSHOT_20261018.BIN</div>
+            <div style="font-size:10px;color:var(--emerald)" id="log-scan-status">✓ 4 Fault Counters & 3 Snapshots Parsed</div>
+            <div class="scan-progress-bar" id="scan-bar"><div class="scan-progress-fill" id="scan-fill"></div></div>
+          </div>
+
+          <div class="registers-grid">
+            <div class="reg-chip">
+              <div class="reg-label">Fault Current (Snap)</div>
+              <div class="reg-val" id="val-curr">295.0 A</div>
+            </div>
+            <div class="reg-chip">
+              <div class="reg-label">Thermal Alarm Count</div>
+              <div class="reg-val" id="val-thermal">+1 (Active)</div>
+            </div>
+            <div class="reg-chip">
+              <div class="reg-label">Bus Voltage (B+)</div>
+              <div class="reg-val" id="val-vbatt">18.2 V</div>
+            </div>
+            <div class="reg-chip">
+              <div class="reg-label">Motor Hall Sequence</div>
+              <div class="reg-val" id="val-hall">011 (Valid)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NATURAL LANGUAGE SYMPTOM -->
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;display:block;margin-bottom:6px">Lời Mô tả Triệu chứng của Kỹ sư (Tiếng Việt):</label>
+          <textarea class="symptom-text-area" id="txt-symptom">A937 tắt ngúm sau khoảng 30 giây khi cắt bê tông đá nặng. Sờ vỏ máy thấy nóng ran vùng tản nhiệt, bóp cò thử lại máy chỉ giật nhẹ rồi khóa hẳn.</textarea>
+        </div>
+
+        <button class="btn-trigger-ai" id="btn-run-neuro" onclick="executeNeuroDiagnosis()">
+          <span>⚡</span> Khởi chạy Chẩn đoán Neuro-Symbolic
+        </button>
+
+      </div>
+
+      <!-- CỘT PHẢI: LIVE FTA & ACTION CENTER -->
+      <div class="proto-workspace">
+        
+        <!-- LIVE FTA SVG & SIGNALS -->
+        <div class="live-tree-card">
+          <div class="card-header-row">
+            <div>
+              <h3>Cây Lỗi Động Trực Tiếp (Live Dynamic FTA)</h3>
+              <div style="font-size:11px;color:var(--text-muted)">Cập nhật xác suất liên tục theo mạng Bayes</div>
+            </div>
+            <div class="entropy-meter">
+              <span>H(C):</span>
+              <div class="entropy-bar-bg"><div class="entropy-bar-fill" id="entropy-fill"></div></div>
+              <span id="entropy-val" style="font-family:var(--font-mono);font-weight:700">1.82 bits</span>
+            </div>
+          </div>
+
+          <!-- SVG FAULT TREE -->
+          <div class="svg-canvas-box">
+            <svg id="live-fta-svg" viewBox="0 0 460 270" style="width:100%;height:auto;display:block">
+              <!-- Top Event -->
+              <rect x="150" y="8" width="160" height="28" rx="6" fill="#dc2626"/>
+              <text x="230" y="26" fill="#fff" font-size="11" font-weight="800" text-anchor="middle" id="tree-top-title">TOOL SHUTDOWN (A937)</text>
+              
+              <line x1="230" y1="36" x2="230" y2="52" stroke="#475569" stroke-width="1.5"/>
+              <rect x="212" y="52" width="36" height="18" rx="9" fill="#fef3c7" stroke="#d97706"/>
+              <text x="230" y="65" fill="#92400e" font-size="9" font-weight="800" text-anchor="middle">OR</text>
+              <line x1="230" y1="70" x2="230" y2="84" stroke="#475569" stroke-width="1.5"/>
+              
+              <!-- Bus line -->
+              <line x1="60" y1="84" x2="400" y2="84" stroke="#475569" stroke-width="1.5"/>
+              
+              <!-- 4 Nhánh -->
+              <!-- Branch 1: Thermal -->
+              <line x1="60" y1="84" x2="60" y2="98" stroke="#475569" stroke-width="1.5"/>
+              <rect id="svg-b-therm-bg" x="15" y="98" width="90" height="38" rx="6" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+              <text x="60" y="113" fill="#dc2626" font-size="10" font-weight="700" text-anchor="middle">🌡 Thermal</text>
+              <text id="svg-b-therm-pct" x="60" y="128" fill="#dc2626" font-size="12" font-weight="800" text-anchor="middle">91%</text>
+
+              <!-- Branch 2: Overcurrent -->
+              <line x1="170" y1="84" x2="170" y2="98" stroke="#475569" stroke-width="1.5"/>
+              <rect id="svg-b-oc-bg" x="125" y="98" width="90" height="38" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+              <text x="170" y="113" fill="#d97706" font-size="10" font-weight="700" text-anchor="middle">⚡ Overcurrent</text>
+              <text id="svg-b-oc-pct" x="170" y="128" fill="#d97706" font-size="12" font-weight="800" text-anchor="middle">74%</text>
+
+              <!-- Branch 3: Mech / Stall -->
+              <line x1="290" y1="84" x2="290" y2="98" stroke="#475569" stroke-width="1.5"/>
+              <rect id="svg-b-mech-bg" x="245" y="98" width="90" height="38" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+              <text x="290" y="113" fill="#d97706" font-size="10" font-weight="700" text-anchor="middle">⚙ Mech / Load</text>
+              <text id="svg-b-mech-pct" x="290" y="128" fill="#d97706" font-size="12" font-weight="800" text-anchor="middle">68%</text>
+
+              <!-- Branch 4: Gate / Power -->
+              <line x1="400" y1="84" x2="400" y2="98" stroke="#475569" stroke-width="1.5"/>
+              <rect id="svg-b-gate-bg" x="355" y="98" width="90" height="38" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+              <text x="400" y="113" fill="#64748b" font-size="10" font-weight="700" text-anchor="middle">🔌 Gate/Supply</text>
+              <text id="svg-b-gate-pct" x="400" y="128" fill="#64748b" font-size="12" font-weight="800" text-anchor="middle">6%</text>
+
+              <!-- Leaves -->
+              <line x1="60" y1="136" x2="60" y2="160" stroke="#475569" stroke-dasharray="2,2"/>
+              <rect id="leaf-node-rt1" x="10" y="160" width="100" height="26" rx="4" fill="#0f172a" stroke="#ef4444"/>
+              <text x="60" y="177" fill="#f87171" font-size="9" font-weight="600" text-anchor="middle">RT1 Thermistor</text>
+
+              <line x1="290" y1="136" x2="290" y2="160" stroke="#475569" stroke-dasharray="2,2"/>
+              <rect id="leaf-node-blade" x="240" y="160" width="100" height="26" rx="4" fill="#0f172a" stroke="#f59e0b"/>
+              <text x="290" y="177" fill="#fbbf24" font-size="9" font-weight="600" text-anchor="middle">Worn Blade Load</text>
+
+              <!-- Live notification banner inside SVG -->
+              <rect x="20" y="215" width="420" height="40" rx="6" fill="#0b1329" stroke="#1e293b"/>
+              <text id="svg-status-text" x="230" y="239" fill="#38bdf8" font-size="11" font-weight="600" text-anchor="middle">Đang chờ khởi chạy hoặc thực hiện bước kiểm tra...</text>
+            </svg>
+          </div>
+
+          <!-- SIGNALS TRÍCH XUẤT -->
+          <div class="signals-container">
+            <div style="font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px">Explainable Signals (Cơ sở Suy luận Minh bạch):</div>
+            <div id="box-signals-list">
+              <div class="sig-row">
+                <span class="badge badge-emerald">DATA LOG</span>
+                <span style="color:var(--text-muted)">Fault Current = <strong>295.0A</strong> đạt <strong>92.2%</strong> ngưỡng HWOC 320A (R42, U7)</span>
+              </div>
+              <div class="sig-row">
+                <span class="badge badge-red">FIRMWARE</span>
+                <span style="color:var(--text-muted)">Hot Thermal Overload counter tăng 1; Junction Temp ước lượng vượt 139°C</span>
+              </div>
+              <div class="sig-row">
+                <span class="badge badge-blue">SEMANTIC</span>
+                <span style="color:var(--text-muted)">Cụm từ <em>"cắt bê tông đá nặng"</em> ánh xạ vào mô hình Tải cơ học cực hạn</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTION CENTER & NEXT-BEST-TEST -->
+        <div class="active-test-card">
+          <div class="card-header-row">
+            <div>
+              <h3>Gợi ý Bước Đo Tối ưu (Next-Best-Test)</h3>
+              <div style="font-size:11px;color:var(--text-muted)">Tối ưu hóa Information Gain / Chi phí kiểm tra</div>
+            </div>
+            <span class="badge badge-cyan" style="font-family:var(--font-mono)">Rank = IG / Cost^0.7</span>
+          </div>
+
+          <!-- STEP 1: RECOMMENDED -->
+          <div class="step-card priority-1" id="card-step-mech">
+            <div class="step-top">
+              <div class="step-title-grp">
+                <div class="rank-circle" id="badge-rank-mech">1</div>
+                <div class="step-name">Kiểm tra Ngoại quan: Tải Cơ & Độ mòn Lưỡi cắt</div>
+              </div>
+              <span class="cost-tag" style="color:var(--emerald);border:1px solid var(--emerald)">Cost: 1 (Quan sát mắt)</span>
+            </div>
+            <div class="step-desc">Dòng 295A sát 320A nhưng không có mã ngắn mạch MOSFET. Hãy kiểm tra tình trạng răng đĩa cắt kim cương và khe hở cơ khí.</div>
+            <span class="schematic-tag">Location: Blade Arbor & Mechanical Assembly</span>
+            
+            <div class="action-row">
+              <span style="font-size:11px;color:var(--text-dim);font-weight:700">Kết quả quan sát:</span>
+              <button class="btn-choice" id="btn-choice-mech-norm" onclick="applyTest('mech', 'norm')">✓ Lưỡi bén, quay êm</button>
+              <button class="btn-choice" id="btn-choice-mech-abnorm" onclick="applyTest('mech', 'abnorm')">✗ Lưỡi mòn cùn trơ thép, ma sát cực lớn</button>
+            </div>
+          </div>
+
+          <!-- STEP 2 -->
+          <div class="step-card" id="card-step-rt1">
+            <div class="step-top">
+              <div class="step-title-grp">
+                <div class="rank-circle" id="badge-rank-rt1">2</div>
+                <div class="step-name">Đo Điện trở Thermistor RT1 trên mạch FET</div>
+              </div>
+              <span class="cost-tag">Cost: 4 (Mở vỏ + VOM)</span>
+            </div>
+            <div class="step-desc">Đo điện trở tại node FET_LS_THERM để loại trừ khả năng sensor nhiệt RT1 bị hở/ngắn mạch gây báo nhiệt giả về MCU.</div>
+            <span class="schematic-tag">Schematic: RT1 (Ngưỡng: ~10.0kΩ ở 25°C)</span>
+            
+            <div class="action-row">
+              <span style="font-size:11px;color:var(--text-dim);font-weight:700">Giá trị đo:</span>
+              <input type="number" id="input-val-rt1" placeholder="kΩ (ví dụ 10.2)" step="0.1" style="background:var(--bg-dark);border:1px solid var(--border-color);color:#fff;font-family:var(--font-mono);font-size:12px;padding:5px 8px;border-radius:4px;width:105px" onchange="applyNumericTest('rt1', this.value)">
+              <span style="font-size:11px;color:var(--text-muted)">kΩ</span>
+              <span id="txt-rt1-eval" style="font-size:11px;font-weight:700;margin-left:auto"></span>
+            </div>
+          </div>
+
+          <!-- STEP 3 -->
+          <div class="step-card" id="card-step-shunt">
+            <div class="step-top">
+              <div class="step-title-grp">
+                <div class="rank-circle">3</div>
+                <div class="step-name">Đo Dạng sóng Dòng Shunt R42 / Khuyếch đại U7</div>
+              </div>
+              <span class="cost-tag" style="color:var(--red);border:1px solid var(--red)">Cost: 8 (Oscilloscope)</span>
+            </div>
+            <div class="step-desc">Kẹp máy hiện sóng vào CSP1/CSN1 để đối chiếu dòng thực tế với dòng 295A mà MCU ghi nhận.</div>
+            <span class="schematic-tag">Schematic: R42, U7, CRNT_MCU</span>
+            
+            <div class="action-row">
+              <span style="font-size:11px;color:var(--text-dim);font-weight:700">Trạng thái:</span>
+              <button class="btn-choice" onclick="applyTest('shunt', 'norm')">✓ Dạng sóng chuẩn ~290A</button>
+              <button class="btn-choice" onclick="applyTest('shunt', 'abnorm')">✗ Nhiễu cao / Lệch áp</button>
+            </div>
+          </div>
+
+          <!-- BANNER XÁC NHẬN & TỰ HỌC LAPLACE -->
+          <div class="learning-commit-box" id="box-commit-learning">
+            <div>
+              <div style="font-size:13px;font-weight:800;color:var(--emerald)">🎯 ĐÃ CÔ LẬP NGUYÊN NHÂN GỐC THÀNH CÔNG!</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px">
+                Nguyên nhân: <strong>Lưỡi cắt mòn cùn $\rightarrow$ Tải cơ học quá mức $\rightarrow$ Quá nhiệt thứ cấp RT1</strong>.
+              </div>
+            </div>
+            <button class="btn-commit-laplace" id="btn-commit-now" onclick="commitCase()">
+              💾 Lưu Tri Thức (Laplace Update)
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================
+       TAB 3: MATH & DATA SCHEMAS
+       ======================================================== -->
+  <div id="tab-math" class="tab-pane">
+    <h2><span>📐</span> Cơ sở Toán học & Chuẩn dữ liệu (Formulas & Schemas)</h2>
+    <p class="lead-desc">Toàn bộ công thức toán học chạy ngầm trong engine chẩn đoán cùng các định dạng JSON Schema cấu trúc hóa dữ liệu giữa các tầng.</p>
+
+    <div class="math-container">
+      
+      <!-- TOÁN 1 -->
+      <div class="card">
+        <h3 style="font-size:15px;color:var(--cyan);font-weight:700;margin-bottom:6px">1. Mô hình Cập nhật Bayes Noisy-OR</h3>
+        <p style="font-size:13px;color:var(--text-muted)">Khi các nguyên nhân phần cứng có thể xảy ra đồng thời, công thức Noisy-OR tính xác suất hậu nghiệm cho nguyên nhân $C_i$ khi tiếp nhận chuỗi bằng chứng $E_{1:k}$:</p>
+        
+        <div class="formula-display">
+          P(C_i \mid E_{1:k}) = \frac{P(C_i) \prod_{t=1}^k P(E_t \mid C_i)}{P(C_i) \prod_{t=1}^k P(E_t \mid C_i) + (1 - P(C_i)) \prod_{t=1}^k P(E_t \mid \neg C_i)}
+        </div>
+
+        <h4 style="font-size:13px;color:#fff;margin-top:14px;margin-bottom:4px">Hàm Hợp lý Liên tục (Continuous Sigmoid Likelihood):</h4>
+        <p style="font-size:12px;color:var(--text-muted)">Giá trị đo $x$ được ánh xạ mượt mà quanh ngưỡng an toàn $T_{\text{thresh}}$ với hệ số đệm cận biên $m_0 \approx 0.9 \cdot T_{\text{thresh}}$:</p>
+        <div class="formula-display">
+          s(x) = \frac{1}{1 + \exp\left(-k \cdot \frac{x - m_0}{T_{\text{thresh}}}\right)}
+        </div>
+
+        <!-- Interactive Playground -->
+        <div class="interactive-slider-box">
+          <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700">
+            <span>Thử nghiệm Hàm Sigmoid với Dòng Pha:</span>
+            <span id="slider-curr-lbl" style="color:var(--cyan)">295 A</span>
+          </div>
+          <input type="range" min="150" max="350" value="295" style="width:100%;margin:10px 0;accent-color:var(--cyan)" oninput="updateSigmoidDemo(this.value)">
+          <div style="font-size:11px;color:var(--text-muted);display:flex;justify-content:space-between">
+            <span>Bình thường (<270A)</span>
+            <span>Cận ngưỡng (288A)</span>
+            <span>Ngắt HWOC (≥320A)</span>
+          </div>
+          <div id="slider-sigmoid-result" style="margin-top:8px;font-size:12px;font-family:var(--font-mono);font-weight:700;color:var(--amber)">
+            s(295A) = 0.742 $\rightarrow$ Mức độ bất thường: CẬN NGUY HIỂM (74.2%)
+          </div>
+        </div>
+      </div>
+
+      <!-- TOÁN 2 -->
+      <div class="card">
+        <h3 style="font-size:15px;color:var(--emerald);font-weight:700;margin-bottom:6px">2. Thuật toán Gợi ý Bước Đo Tối ưu (Next-Best-Test)</h3>
+        <p style="font-size:13px;color:var(--text-muted)">Độ bất định toàn hệ thống được đo bằng độ hỗn loạn Shannon Entropy:</p>
+        
+        <div class="formula-display">
+          H(C) = -\sum_{i=1}^n \Big[ P(C_i) \log_2 P(C_i) + (1 - P(C_i)) \log_2(1 - P(C_i)) \Big]
+        </div>
+
+        <p style="font-size:13px;color:var(--text-muted)">Hệ thống tính lượng thông tin kỳ vọng thu được (Information Gain) nếu kỹ sư thực hiện phép đo $T_j$, sau đó phạt theo chi phí (Cost):</p>
+        
+        <div class="formula-display">
+          \text{Priority}(T_j) = \frac{H(C) - \mathbb{E}[H(C \mid T_j)]}{\left(\text{Cost}(T_j)\right)^\alpha}
+        </div>
+        <p style="font-size:12px;color:var(--text-dim)">Với $\alpha \approx 0.7$, các bước đo mắt/ngoại quan (Cost 1) có lợi thế cực lớn so với việc tháo bo mạch cắm máy hiện sóng (Cost 8).</p>
+      </div>
+
+      <!-- SCHEMA 1 -->
+      <div class="card">
+        <h3 style="font-size:15px;color:var(--blue);font-weight:700;margin-bottom:6px">3. Knowledge Graph Entity Schema (Neo4j)</h3>
+        <p style="font-size:12px;color:var(--text-muted)">Mỗi nút lá trong cây FTA được liên kết với linh kiện, chân IC và ngưỡng vật lý:</p>
+        <pre class="code-dump">{
+  "node_id": "hwoc_a937",
+  "category": "Overcurrent",
+  "label": "Hardware Overcurrent",
+  "schematic_refs": ["R42", "U7", "CRNT_MCU"],
+  "test_points": ["CSP1", "CSN1"],
+  "measurement": {
+    "type": "numeric",
+    "unit": "A",
+    "threshold": 320.0,
+    "direction": "above",
+    "cost_factor": 8
+  },
+  "prior_probability": 0.12,
+  "telemetry_counter_key": "HWOC_COUNT"
+}</pre>
+      </div>
+
+      <!-- SCHEMA 2 -->
+      <div class="card">
+        <h3 style="font-size:15px;color:var(--purple);font-weight:700;margin-bottom:6px">4. Case Memory Record (Qdrant + Postgres)</h3>
+        <p style="font-size:12px;color:var(--text-muted)">Định dạng lưu trữ một ca chẩn đoán thành công vào Episodic Memory:</p>
+        <pre class="code-dump">{
+  "case_id": "CASE-20261018-0937",
+  "model": "A937",
+  "symptom_vector_embedding": [0.0124, -0.0451, 0.0892, ...],
+  "telemetry_snapshot": {
+    "fault_current": 295.0,
+    "hot_thermal_inc": true,
+    "batt_v": 18.2
+  },
+  "verified_root_cause": "Worn_Blade_Excessive_Load",
+  "action_taken": "Replaced diamond blade, current dropped to 182A",
+  "engineer_rating": 5,
+  "confidence_score": 0.96
+}</pre>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL POPUPS FOR LAYER DETAILS -->
+<div class="modal-layer" id="modal-l1" onclick="closeModalOnBg(event, 'modal-l1')">
+  <div class="modal-inner">
+    <button class="modal-close-x" onclick="hideModal('modal-l1')">✕</button>
+    <h3 style="color:var(--purple);font-size:16px;font-weight:800;margin-bottom:8px">Chi tiết Tầng 1: Tri-Store Ingestion Architecture</h3>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Kiến trúc 3 kho dữ liệu phối hợp ngăn chặn hoàn toàn việc mất liên kết mạch điện:</p>
+    <pre class="code-dump">// Cypher Query trên Neo4j: Tìm đường dẫn từ triệu chứng đến chân đo
+MATCH (f:FailureMode {id: 'hot_thermal'})-[:LOCATED_ON]->(c:Component {designator: 'RT1'})
+MATCH (c)-[:CONNECTED_TO]->(tp:TestPoint {name: 'FET_LS_THERM'})
+RETURN f.name, c.designator, tp.name, f.threshold;</pre>
+  </div>
+</div>
+
+<div class="modal-layer" id="modal-l2" onclick="closeModalOnBg(event, 'modal-l2')">
+  <div class="modal-inner">
+    <button class="modal-close-x" onclick="hideModal('modal-l2')">✕</button>
+    <h3 style="color:var(--blue);font-size:16px;font-weight:800;margin-bottom:8px">Chi tiết Tầng 2: Telemetry Parser & Initial Evidence</h3>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Đọc trực tiếp cấu trúc thanh ghi từ file dump và trích xuất thực thể ngữ nghĩa:</p>
+    <pre class="code-dump">class InitialEvidence(BaseModel):
+    model: str = "A937"
+    logged_fault_current: Optional[float] = 295.0
+    thermal_counter_incremented: bool = True
+    battery_voltage_cutoff: bool = False
+    reported_symptoms: List[str] = ["heavy_concrete_cutting", "housing_overheating"]</pre>
+  </div>
+</div>
+
+<div class="modal-layer" id="modal-l3" onclick="closeModalOnBg(event, 'modal-l3')">
+  <div class="modal-inner">
+    <button class="modal-close-x" onclick="hideModal('modal-l3')">✕</button>
+    <h3 style="color:var(--emerald);font-size:16px;font-weight:800;margin-bottom:8px">Chi tiết Tầng 3: Engine Toán học Bayes & Active Testing</h3>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Tính toán thuần túy trên ma trận NumPy, thời gian thực thi dưới 10ms:</p>
+    <pre class="code-dump">def rank_tests(entropy_prior, candidate_tests, cost_matrix, alpha=0.7):
+    rankings = []
+    for test in candidate_tests:
+        expected_entropy = compute_expected_entropy(test)
+        ig = entropy_prior - expected_entropy
+        score = ig / (cost_matrix[test.id] ** alpha)
+        rankings.append((test.id, score))
+    return sorted(rankings, key=lambda x: x[1], reverse=True)</pre>
+  </div>
+</div>
+
+<div class="modal-layer" id="modal-l4" onclick="closeModalOnBg(event, 'modal-l4')">
+  <div class="modal-inner">
+    <button class="modal-close-x" onclick="hideModal('modal-l4')">✕</button>
+    <h3 style="color:var(--cyan);font-size:16px;font-weight:800;margin-bottom:8px">Chi tiết Tầng 4: Vòng lặp Học liên tục (Laplace Update)</h3>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Tự động tăng cường phân phối tiên nghiệm của lỗi đã được giải quyết:</p>
+    <pre class="code-dump">// Cập nhật phân phối tiên nghiệm Beta-Binomial
+P_updated = (alpha_prior + count_observed) / (alpha_prior + beta_prior + total_cases);
+// Lưu vector embedding vào Qdrant để tra cứu tương tự sau này
+qdrant.upsert(collection="case_memory", points=[case_vector_payload]);</pre>
+  </div>
+</div>
+
+<script>
+// =========================================================
+// TAB NAVIGATION & MODALS
+// =========================================================
+function navigateTab(tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  
+  if(tabId === 'arch') {
+    document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+    document.getElementById('tab-arch').classList.add('active');
+  } else if(tabId === 'proto') {
+    document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+    document.getElementById('tab-proto').classList.add('active');
+  } else if(tabId === 'math') {
+    document.querySelector('.tab-btn:nth-child(3)').classList.add('active');
+    document.getElementById('tab-math').classList.add('active');
+  }
+}
+
+function showModal(id) { document.getElementById(id).classList.add('active'); }
+function hideModal(id) { document.getElementById(id).classList.remove('active'); }
+function closeModalOnBg(e, id) { if(e.target.classList.contains('modal-layer')) hideModal(id); }
+
+// =========================================================
+// PROTOTYPE DATA & ENGINE
+// =========================================================
+const DATA_MODELS = {
+  a937: {
+    model: 'A937',
+    logFile: 'A937_SNAPSHOT_20261018.BIN',
+    curr: '295.0 A',
+    thermal: '+1 (Active)',
+    vbatt: '18.2 V',
+    hall: '011 (Valid)',
+    symptom: 'A937 tắt ngúm sau khoảng 30 giây khi cắt bê tông đá nặng. Sờ vỏ máy thấy nóng ran vùng tản nhiệt, bóp cò thử lại máy chỉ giật nhẹ rồi khóa hẳn.',
+    tree: { therm: 91, oc: 74, mech: 68, gate: 6 },
+    signals: [
+      { tag: 'DATA LOG', cls: 'badge-emerald', text: 'Fault Current = <strong>295.0A</strong> đạt <strong>92.2%</strong> ngưỡng HWOC 320A (R42, U7)' },
+      { tag: 'FIRMWARE', cls: 'badge-red', text: 'Hot Thermal Overload counter tăng 1; Junction Temp ước lượng vượt 139°C' },
+      { tag: 'SEMANTIC', cls: 'badge-blue', text: 'Cụm từ <em>"cắt bê tông đá nặng"</em> ánh xạ vào mô hình Tải cơ học cực hạn' }
+    ]
+  },
+  a912: {
+    model: 'A912',
+    logFile: 'A912_CAPTURE_0942.BIN',
+    curr: '45.0 A',
+    thermal: '0 (Normal)',
+    vbatt: '19.4 V',
+    hall: '000 (STUCK)',
+    symptom: 'Máy A912 bóp cò động cơ bị giật cục khựng lại không quay tròn được, phát ra tiếng tạch tạch ở cuộn dây stator.',
+    tree: { therm: 12, oc: 35, mech: 92, gate: 48 },
+    signals: [
+      { tag: 'DATA LOG', cls: 'badge-red', text: 'Hall State ghi nhận = <strong>000 (Invalid sequence)</strong>' },
+      { tag: 'FIRMWARE', cls: 'badge-amber', text: 'Broken Hall flag kích hoạt trong vòng 1.2s khởi động' },
+      { tag: 'SEMANTIC', cls: 'badge-blue', text: 'Cụm từ <em>"giật cục, tạch tạch"</em> khớp 96% với lỗi lệch pha cảm biến Hall' }
+    ]
+  },
+  a552: {
+    model: 'A552',
+    logFile: 'A552_DUMP_0411.BIN',
+    curr: '11.5 A',
+    thermal: '0 (Normal)',
+    vbatt: '16.1 V',
+    hall: '101 (Valid)',
+    symptom: 'Máy khoan A552 đang chạy bình thường thì bỗng nhiên tắt ngắt rồi đèn LED nguồn chớp lại như vừa cắm pin mới.',
+    tree: { therm: 6, oc: 14, mech: 10, gate: 94 },
+    signals: [
+      { tag: 'DATA LOG', cls: 'badge-red', text: 'Reset Flag ghi nhận = <strong>WDT / POR (Power-on Reset)</strong>' },
+      { tag: 'FIRMWARE', cls: 'badge-purple', text: 'Điện áp đường 3.3V_MCU có thời điểm tụt dưới ngưỡng UVLO 3.0V' },
+      { tag: 'SEMANTIC', cls: 'badge-blue', text: 'Hiện tượng <em>"LED chớp lại như mới cắm pin"</em> là dấu hiệu mất nguồn điều khiển' }
+    ]
+  }
+};
+
+let currentKey = 'a937';
+let autoDemoTimer = null;
+
+function applyPreset(key) {
+  currentKey = key;
+  const data = DATA_MODELS[key];
+  
+  document.querySelectorAll('.preset-item-btn').forEach((b, idx) => {
+    b.classList.toggle('active', (key==='a937'&&idx===0)||(key==='a912&&idx===1')||(key==='a552'&&idx===2));
+  });
+
+  document.getElementById('log-name-tag').innerText = data.logFile;
+  document.getElementById('val-curr').innerText = data.curr;
+  document.getElementById('val-thermal').innerText = data.thermal;
+  document.getElementById('val-vbatt').innerText = data.vbatt;
+  document.getElementById('val-hall').innerText = data.hall;
+  document.getElementById('txt-symptom').value = data.symptom;
+  document.getElementById('tree-top-title').textContent = 'TOOL SHUTDOWN (' + data.model + ')';
+
+  resetActiveTestsUI();
+  updateSvgTree(data.tree);
+  populateSignals(data.signals);
+  document.getElementById('box-commit-learning').classList.remove('show');
+  document.getElementById('svg-status-text').textContent = 'Đã nạp telemetry & chuẩn hóa kịch bản ' + data.model;
+}
+
+function simulateDropLog() {
+  const bar = document.getElementById('scan-bar');
+  const fill = document.getElementById('scan-fill');
+  const status = document.getElementById('log-scan-status');
+  
+  bar.style.display = 'block';
+  fill.style.width = '0%';
+  status.textContent = 'Đang phân tích cấu trúc thanh ghi Hex...';
+  
+  setTimeout(() => { fill.style.width = '60%'; }, 150);
+  setTimeout(() => {
+    fill.style.width = '100%';
+    status.textContent = '✓ Hoàn tất bóc tách: 4 Fault Counters & 3 Snapshots';
+    setTimeout(() => { bar.style.display = 'none'; }, 300);
+  }, 400);
+}
+
+function executeNeuroDiagnosis() {
+  const btn = document.getElementById('btn-run-neuro');
+  btn.innerHTML = '<span>⏳</span> Đang suy luận Bayes & GraphRAG...';
+  btn.style.opacity = '0.75';
+
+  setTimeout(() => {
+    btn.innerHTML = '<span>⚡</span> Khởi chạy Chẩn đoán Neuro-Symbolic';
+    btn.style.opacity = '1';
+    
+    const data = DATA_MODELS[currentKey];
+    updateSvgTree(data.tree);
+    populateSignals(data.signals);
+    document.getElementById('svg-status-text').textContent = 'Mạng Bayes đã cập nhật! Ưu tiên số 1: Kiểm tra ngoại quan Tải cơ học';
+    
+    // Highlight step 1
+    const cardMech = document.getElementById('card-step-mech');
+    cardMech.classList.add('priority-1');
+    cardMech.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 400);
+}
+
+function updateSvgTree(t) {
+  document.getElementById('svg-b-therm-pct').textContent = t.therm + '%';
+  document.getElementById('svg-b-oc-pct').textContent = t.oc + '%';
+  document.getElementById('svg-b-mech-pct').textContent = t.mech + '%';
+  document.getElementById('svg-b-gate-pct').textContent = t.gate + '%';
+
+  setNodeSvgColor('svg-b-therm-bg', 'svg-b-therm-pct', t.therm);
+  setNodeSvgColor('svg-b-oc-bg', 'svg-b-oc-pct', t.oc);
+  setNodeSvgColor('svg-b-mech-bg', 'svg-b-mech-pct', t.mech);
+  setNodeSvgColor('svg-b-gate-bg', 'svg-b-gate-pct', t.gate);
+}
+
+function setNodeSvgColor(bgId, textId, pct) {
+  const bg = document.getElementById(bgId);
+  const txt = document.getElementById(textId);
+  if(pct >= 70) {
+    bg.setAttribute('fill', '#fee2e2');
+    bg.setAttribute('stroke', '#dc2626');
+    txt.setAttribute('fill', '#dc2626');
+  } else if(pct >= 30) {
+    bg.setAttribute('fill', '#fef3c7');
+    bg.setAttribute('stroke', '#d97706');
+    txt.setAttribute('fill', '#d97706');
+  } else {
+    bg.setAttribute('fill', '#f1f5f9');
+    bg.setAttribute('stroke', '#cbd5e1');
+    txt.setAttribute('fill', '#94a3b8');
+  }
+}
+
+function populateSignals(signals) {
+  const list = document.getElementById('box-signals-list');
+  list.innerHTML = '';
+  signals.forEach(s => {
+    const r = document.createElement('div');
+    r.className = 'sig-row';
+    r.innerHTML = `<span class="badge ${s.cls}">${s.tag}</span><span style="color:var(--text-muted)">${s.text}</span>`;
+    list.appendChild(r);
+  });
+}
+
+function resetActiveTestsUI() {
+  document.getElementById('btn-choice-mech-norm').className = 'btn-choice';
+  document.getElementById('btn-choice-mech-abnorm').className = 'btn-choice';
+  document.getElementById('input-val-rt1').value = '';
+  document.getElementById('txt-rt1-eval').textContent = '';
+  document.querySelectorAll('.step-card').forEach(c => c.classList.remove('verified'));
+}
+
+// =========================================================
+// BAYESIAN INTERACTIVE TESTING
+// =========================================================
+function applyTest(testKey, status) {
+  if(testKey === 'mech') {
+    const bNorm = document.getElementById('btn-choice-mech-norm');
+    const bAbnorm = document.getElementById('btn-choice-mech-abnorm');
+    bNorm.className = 'btn-choice' + (status==='norm'?' active-norm':'');
+    bAbnorm.className = 'btn-choice' + (status==='abnorm'?' active-abnorm':'');
+    
+    const card = document.getElementById('card-step-mech');
+    card.classList.add('verified');
+
+    if(status === 'abnorm') {
+      // Xác nhận lưỡi cắt mòn cùn:
+      // Tải cơ học nhảy lên 96%, Quá nhiệt & Quá dòng giảm xuống hệ quả thứ cấp
+      updateSvgTree({ therm: 42, oc: 34, mech: 96, gate: 2 });
+      
+      // Giảm entropy
+      document.getElementById('entropy-val').textContent = '0.41 bits';
+      document.getElementById('entropy-fill').style.width = '22%';
+      document.getElementById('entropy-fill').style.background = 'var(--emerald)';
+
+      document.getElementById('svg-status-text').textContent = '✓ BAYES UPDATE: Tải cơ học = 96% (Xác nhận Nguyên nhân Gốc!)';
+      
+      // Đổi màu nút lá
+      document.getElementById('leaf-node-blade').setAttribute('fill', '#78350f');
+      document.getElementById('leaf-node-blade').setAttribute('stroke', '#f59e0b');
+
+      // Bổ sung signal minh chứng
+      const list = document.getElementById('box-signals-list');
+      const r = document.createElement('div');
+      r.className = 'sig-row';
+      r.innerHTML = `<span class="badge badge-emerald">TEST VERIFIED</span><span style="color:#34d399">Lưỡi cắt cùn sinh lực cản lớn làm tăng vọt dòng lên 295A và quá nhiệt thứ cấp RT1</span>`;
+      list.prepend(r);
+
+      // Mở banner lưu tri thức
+      document.getElementById('box-commit-learning').classList.add('show');
+      document.getElementById('box-commit-learning').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+      // Lưỡi tốt -> Loại trừ tải cơ, tập trung đo RT1
+      updateSvgTree({ therm: 95, oc: 82, mech: 6, gate: 4 });
+      document.getElementById('svg-status-text').textContent = 'Lưỡi cắt tốt! Loại trừ tải cơ, chuyển sang đo RT1 (Bước 2)';
+    }
+  }
+}
+
+function applyNumericTest(testKey, val) {
+  if(testKey === 'rt1') {
+    const v = parseFloat(val);
+    const evalTxt = document.getElementById('txt-rt1-eval');
+    if(isNaN(v)) { evalTxt.textContent = ''; return; }
+    
+    if(v >= 8.5 && v <= 12.0) {
+      evalTxt.innerHTML = '<span style="color:var(--emerald)">✓ Bình thường (10kΩ nominal)</span>';
+    } else {
+      evalTxt.innerHTML = '<span style="color:var(--red)">✗ Bất thường (Hở/Ngắn mạch RT1)</span>';
+      updateSvgTree({ therm: 98, oc: 25, mech: 12, gate: 3 });
+      document.getElementById('svg-status-text').textContent = 'RT1 hỏng dẫn đến đọc sai nhiệt độ giả lập!';
+    }
+  }
+}
+
+function commitCase() {
+  const btn = document.getElementById('btn-commit-now');
+  btn.innerHTML = '<span>⏳</span> Đang tính Laplace Conjugate & Vector Embedding...';
+  btn.style.opacity = '0.7';
+
+  setTimeout(() => {
+    btn.innerHTML = '<span>✅</span> Đã Lưu Tri Thức Thành Công!';
+    btn.style.background = '#059669';
+    btn.style.color = '#fff';
+    
+    alert("Thành công! Ca sửa chữa [CASE-20261018-0937] đã được lưu vào Episodic Memory.\n\n• Prior xác suất của nguyên nhân 'Worn Blade' dòng A937 tăng từ 0.08 lên 0.14.\n• Master FTA tự động liên kết thuộc tính 'Lưỡi cắt mòn' với ngưỡng dòng 295A.");
+  }, 600);
+}
+
+// =========================================================
+// AUTO-DEMO MODE FOR BOSS & CLIENT
+// =========================================================
+function startAutoWalkthrough() {
+  const btn = document.getElementById('btn-run-auto');
+  btn.textContent = '⏳ Đang chạy Demo...';
+  btn.style.opacity = '0.7';
+
+  // Bước 1: Nạp kịch bản A937
+  applyPreset('a937');
+  simulateDropLog();
+
+  setTimeout(() => {
+    // Bước 2: Chạy suy diễn Neuro-Symbolic
+    executeNeuroDiagnosis();
+  }, 1200);
+
+  setTimeout(() => {
+    // Bước 3: Tự động ghi nhận kết quả đo lưỡi cắt mòn cùn
+    applyTest('mech', 'abnorm');
+    btn.textContent = '✅ Đã hoàn tất Demo!';
+    btn.style.opacity = '1';
+    btn.style.background = 'var(--emerald)';
+  }, 2800);
+}
+
+// =========================================================
+// MATH PLAYGROUND SLIDER
+// =========================================================
+function updateSigmoidDemo(val) {
+  const v = parseFloat(val);
+  document.getElementById('slider-curr-lbl').textContent = v.toFixed(1) + ' A';
+  
+  // Sigmoid quanh ngưỡng 320A, m0 = 288A, k = 10
+  const thresh = 320.0;
+  const m0 = 288.0;
+  const exponent = -12.0 * ((v - m0) / thresh);
+  const s = 1.0 / (1.0 + Math.exp(exponent));
+  
+  const resBox = document.getElementById('slider-sigmoid-result');
+  let label = 'BÌNH THƯỜNG (Safe)';
+  let color = 'var(--emerald)';
+  
+  if(v >= 320) {
+    label = 'NGẮT BẢO VỆ PHẦN CỨNG (HWOC Triggered)';
+    color = 'var(--red)';
+  } else if(v >= 288) {
+    label = 'CẬN NGUY HIỂM / TẢI CỰC HẠN (Warning Zone)';
+    color = 'var(--amber)';
+  }
+  
+  resBox.style.color = color;
+  resBox.innerHTML = `s(${v}A) = ${s.toFixed(3)} &rarr; Mức độ bất thường: ${label} (${(s*100).toFixed(1)}%)`;
+}
+
+// Khởi tạo ban đầu
+document.addEventListener('DOMContentLoaded', () => {
+  applyPreset('a937');
+});
+</script>
+</body>
+</html>
